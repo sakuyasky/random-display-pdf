@@ -1,0 +1,65 @@
+body {
+    padding: 0px;
+    margin: 0 0 15px 0;
+}
+
+#pdf-canvas {
+  /*border: 1px solid black;*/
+  direction: ltr;
+}
+
+.alignCenter {
+    text-align: center;
+    margin: 3px 0;
+}
+
+.alignRight {
+    text-align: right;
+    margin-bottom: 3px;
+}
+
+/* ----- 滚动条样式 ----- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-button:vertical {
+    display: none;
+}
+
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+    background-color: #e2e2e2;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #a6a6a6;
+}
+
+::-webkit-scrollbar-thumb:vertical:hover {
+    background-color: #7f7f7f;
+}
+
+::-webkit-scrollbar-thumb:vertical:active {
+    background-color: rgba(0, 0, 0, .38);
+}
+
+/* ----- 滚动条样式 ----- */
+* {
+    box-sizing: border-box;
+}
+
+.layui-btn-primary:hover {
+    border-color: #1E9FFF;
+}
+
+.layui-btn .layui-icon {
+    margin-right: 0px !important;
+}
+
+.layui-elem-quote {
+    font-weight: bolder;
+    margin-bottom: 3px;
+}

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>2024年经文卡</title>
+    <meta charset="UTF-8">
+    <meta content="webkit" name="renderer">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="telephone=no" name="format-detection">
+    <!-- 引入公用库 -->
+    <script src="./static/common/js/jquery/jquery-1.12.4.min.js"></script>
+    <script src="./static/common/js/jquery/jquery.cookie-1.4.1.min.js"></script>
+    <!-- Layui -->
+    <link media="all" rel="stylesheet" href="./static/common/js/layui/2.6.8/css/layui.css" type="text/css">
+    <script src="./static/common/js/layui/2.6.8/layui.js"></script>
+	<!-- pdfjs -->
+	<script src="./static/common/js/lib/pdfjs/legacy/build/pdf.js"></script>
+    <!--[if lt IE 9]>
+    <script src="./static/common/js/lib/html5.min.js"></script>
+    <script src="./static/common/js/lib/respond.min.js"></script>
+    <![endif]-->
+    <!-- 最后引入common.js、common.css -->
+	<script src="./static/common/js/common.js"></script>
+    <link media="all" rel="stylesheet" href="./static/common/css/common.css" type="text/css">
+	<script>
+	    const ctx = "\/";//应用路径
+		
+        /*设置ajax全局参数*/
+        jQuery.ajaxSetup({
+            timeout: 60000,
+            beforeSend: function () {
+                commonUtil.openLoadingLayer();
+            },
+            error: function (xhr, textStatus, exception) {
+                const responseStatus = xhr.status;
+                const responseText = xhr.responseText;
+                let errorMessage = "";
+                if (responseStatus == "0") {
+                    errorMessage = "错误代码: " + xhr.status + "，网络已断开，请刷新页面。";
+                } else if (responseStatus == "201") {
+                    errorMessage = "错误代码: " + responseStatus + "，服务器错误。";
+                } else if (responseStatus == "400") {
+                    if (responseText === undefined || responseText === '' || responseText === null) {
+                        errorMessage = "错误代码: " + responseStatus + "，客户端的错误请求。";
+                    } else {
+                        const responsePOJO = JSON.parse(responseText);
+                        errorMessage = responsePOJO.message;
+                    }
+                } else if (responseStatus == "403") {
+                    errorMessage = "错误代码: " + responseStatus + "，请求被拒绝。";
+                } else if (responseStatus == "404") {
+                    errorMessage = "错误代码: " + responseStatus + "，请求不存在。";
+                } else if (responseStatus == "405") {
+                    errorMessage = "错误代码: " + responseStatus + "，请求Method错误。";
+                } else if (responseStatus == "500") {
+                    if (responseText === undefined || responseText === '' || responseText === null) {
+                        errorMessage = "错误代码: " + responseStatus + "，系统内部发生错误。";
+                    } else {
+                        const responsePOJO = JSON.parse(responseText);
+                        errorMessage = responsePOJO.message;
+                    }
+                } else if (exception === 'parsererror') {
+                    errorMessage = "无法解析返回结果";
+                } else if (exception === 'timeout') {
+                    errorMessage = "请求响应超时";
+                }
+
+                layui.use('layer', function () {
+                    const layuiLayer = layui.layer;
+                    layuiLayer.open({
+                        title: '<i class="ri-error-warning-line" style="font-size: 30px; color: #FF5722;"></i>',
+                        btn: [], scrollbar: false,
+                        content: errorMessage
+                    });
+                });
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                window.setTimeout(function () {
+                    commonUtil.closeLoadingLayer();
+                }, 100);
+            }
+        });
+
+        layui.use('util', function () {
+            const layuiUtil = layui.util;
+            layuiUtil.fixbar({
+                bar1: false, bar2: false,
+                showHeight: 200, bgcolor: '#393D49', css: {bottom: 50},
+                click: function (type) {
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="layui-fluid">
+    <form class="layui-form" id="dtForm" lay-filter="dtForm" method="post">
+        <div class="layui-row">
+            <div class="layui-col-md12 alignCenter">
+				<button id="randomPdfBtn" class="layui-btn layui-btn-lg layui-btn-radius layui-btn-danger" type="button">&nbsp;&nbsp;&nbsp;&nbsp;GO&nbsp;&nbsp;&nbsp;&nbsp;</button>
+            </div>
+        </div>
+
+        <blockquote class="layui-elem-quote"><cite id="pdfTitleDisplay">经文展示区</cite><cite id="pdfPageNums"></cite></blockquote>
+        <div class="layui-row">
+            <div id="displayPdf" class="layui-col-md12" style="text-align: center;">
+				<canvas id="pdf-canvas"></canvas>
+			</div>
+        </div>
+
+    </form>
+</div>
+
+<script type="text/javascript">
+	pdfjsLib.GlobalWorkerOptions.workerSrc = './static/common/js/lib/pdfjs/legacy/build/pdf.worker.js';
+	const displayPdfWidth = $('#displayPdf').width() - 8;
+	console.log('展示PDF的区域宽度：' + displayPdfWidth);
+	
+    $(function () {
+		layui.use(['form', 'layer'], function () {
+            const layuiForm = layui.form, layuiLayer = layui.layer;
+            layuiForm.render();
+			
+			layuiLayer.open({ type: 1, title: false, time: 20000, closeBtn: false
+				, area: '350px;', shade: 0.8, id: 'LAY_layuipro', btnAlign: 'c'
+				, btn: ['明白了'], moveType: 1
+				, content: '<div style="padding: 40px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">1、请先安静您的心<br><br>2、祷告祈求神使用经文卡对您说话<br><br>3、点击【GO】按钮，随机跳出一张经文卡<br><br>本显示框20秒后自动关闭。</div>'
+			});
+			
+			let pdfStoreArrays = [];
+			$.ajax({
+                url:  "./scriptures-2024-store.json", type: "GET",
+                dataType: "json",
+                success: function (responseData) {
+					pdfStoreArrays = responseData;
+                }
+            });
+			
+			let randomNumMap = new Map();
+			const $displayPdf = $('#displayPdf');
+			
+			$('#randomPdfBtn').on('click', function(){
+				$displayPdf.empty();
+				$('#pdfTitleDisplay').html('');
+				
+				const arraysIndex = getArraysIndex(randomNumMap, pdfStoreArrays.length - 1);
+				//console.log('arraysIndex = ' + arraysIndex);
+				const pdfStoreObj = pdfStoreArrays[arraysIndex];
+				if(pdfStoreObj != undefined || pdfStoreObj != null){
+					const pdfTitle = pdfStoreArrays[arraysIndex].title + "";
+					const pdfUrl = pdfStoreArrays[arraysIndex].path;
+					$('#pdfTitleDisplay').html(pdfTitle);
+					
+					layuiLayer.load();
+					// 打开并渲染PDF
+					displayPdfContent(pdfjsLib, pdfUrl, displayPdfWidth, layuiLayer);
+				}
+			});
+        });
+    });
+	
+	// 判断手机端登录还是PC端登录
+	function getOS() {
+		var ua = navigator.userAgent, isWindowsPhone = /(?:Windows Phone)/.test(ua), 
+			isSymbian = /(?:SymbianOS)/.test(ua) || isWindowsPhone,  isAndroid = /(?:Android)/.test(ua), 
+			isFireFox = /(?:Firefox)/.test(ua), isChrome = /(?:Chrome|CriOS)/.test(ua), 
+			isTablet = /(?:iPad|PlayBook)/.test(ua) || (isAndroid && !/(?:Mobile)/.test(ua)) || (isFireFox && /(?:Tablet)/.test(ua)), isPhone = /(?:iPhone)/.test(ua) && !isTablet, isPc = !isPhone && !isAndroid && !isSymbian; 
+		return { isTablet: isTablet, isPhone: isPhone, isAndroid : isAndroid, isPc : isPc };
+	}; 
+ 	
+	// 获取数组PositionIndex
+	function getArraysIndex(randomNumMap, maxNum){
+		let randomNum = buildRandomNum(1, maxNum);
+		while(randomNumMap.has(randomNum)){
+			if(randomNumMap.size >= maxNum){
+				randomNumMap.clear();
+				console.log('-- clear Map--');
+			}
+			randomNum = buildRandomNum(1, maxNum);
+		}
+		randomNumMap.set(randomNum, randomNum);
+		//console.log(randomNumMap);
+		return randomNum;
+	}
+	
+	// 生成从minNum到maxNum的随机数
+	function buildRandomNum(minNum, maxNum){ 
+		switch(arguments.length){ 
+			case 1: 
+				return parseInt(Math.random() * minNum + 1, 10); 
+				break; 
+			case 2: 
+				return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10); 
+				break; 
+            default: 
+                return 0; 
+            break; 
+		} 
+	}
+	
+	// 展示PDF文件(只有一页)内容
+	function displayPdfContent(pdfjsLib, pdfUrl, displayWidth, layuiLayer){
+		$('#displayPdf').empty();
+		
+		if(displayWidth === null || displayWidth <= 0 ){
+			displayWidth = 400;
+		}
+		
+		const loadingTask = pdfjsLib.getDocument(pdfUrl);
+		loadingTask.promise.then( function(pdf) {
+			//$('#pdfPageNums').html('- 共[' + pdf.numPages + ']页');
+			
+			// PDF第一页
+			const pageNumber = 1;
+			let displayRotation = 0;
+			const os = getOS();
+			if(os.isAndroid || os.isPhone){
+				displayRotation = 90;
+			}
+			// 渲染页面
+			renderPdfPage(pdf, pageNumber, displayWidth, displayRotation);
+			if(layuiLayer != null){
+				layuiLayer.closeAll('loading');
+			}
+		}, function (reason) {
+			console.error(reason);
+		});
+	}
+	function renderPdfPage(pdfDoc, pageNumber, displayWidth, displayRotation){
+		pdfDoc.getPage(pageNumber).then( function(page) {
+			const originalViewPort = page.getViewport({ scale: 1, rotation: displayRotation});
+			//console.log('原始PDF文件的宽度：' + originalViewPort.width);
+			const newScale = displayWidth / originalViewPort.width;
+			//console.log('新尺寸比例：' + newScale);
+			const scaledViewport = page.getViewport({ scale: newScale, rotation: displayRotation});
+			console.log('rotate: ' + page.rotate);
+				
+			// 设置PDF画布的页面尺寸
+			const canvasObj = $('<canvas id="pdf-canvas"></canvas>');
+			$('#displayPdf').append(canvasObj);
+			const canvas = document.getElementById('pdf-canvas');
+			const context = canvas.getContext('2d');
+			canvas.height = scaledViewport.height;
+			canvas.width = scaledViewport.width;
+					
+			// 将PDF渲染到画布中
+			const renderContext = {
+				canvasContext: context,
+				viewport: scaledViewport
+			};
+			const renderTask = page.render(renderContext);
+			renderTask.promise.then(function () {
+				//console.log('页面完成渲染');
+			});
+		});
+	}
+</script>
+</body>
+</html>
