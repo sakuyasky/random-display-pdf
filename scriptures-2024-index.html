@@ -3,18 +3,19 @@
 <head>
     <title>2024年经文卡</title>
     <meta charset="UTF-8">
-    <meta content="webkit" name="renderer">
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
-    <meta content="black" name="apple-mobile-web-app-status-bar-style">
-    <meta content="yes" name="apple-mobile-web-app-capable">
-    <meta content="telephone=no" name="format-detection">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
     <!-- 引入公用库 -->
-    <script src="./static/common/js/jquery/jquery-1.12.4.min.js"></script>
+    <script src="./static/common/js/jquery/jquery-3.7.1.min.js"></script>
+	<script src="./static/common/js/jquery/jquery-migrate-3.4.1.min.js"></script>
     <script src="./static/common/js/jquery/jquery.cookie-1.4.1.min.js"></script>
     <!-- Layui -->
-    <link media="all" rel="stylesheet" href="./static/common/js/layui/2.6.8/css/layui.css" type="text/css">
-    <script src="./static/common/js/layui/2.6.8/layui.js"></script>
+    <link media="all" rel="stylesheet" href="./static/common/js/layui/2.9.20/css/layui.css" type="text/css">
+    <script src="./static/common/js/layui/2.9.20/layui.js"></script>
 	<!-- pdfjs -->
 	<script src="./static/common/js/lib/pdfjs/legacy/build/pdf.js"></script>
     <!--[if lt IE 9]>
@@ -116,7 +117,7 @@
 <script type="text/javascript">
 	pdfjsLib.GlobalWorkerOptions.workerSrc = './static/common/js/lib/pdfjs/legacy/build/pdf.worker.js';
 	const displayPdfWidth = $('#displayPdf').width() - 8;
-	console.log('展示PDF的区域宽度：' + displayPdfWidth);
+	//console.log('展示PDF的区域宽度：' + displayPdfWidth);
 	
     $(function () {
 		layui.use(['form', 'layer'], function () {
